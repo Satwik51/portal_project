@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Attendance Portal</title>
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <h2>Admin Panel</h2>
+      <ul style="margin-top:2rem; list-style:none;">
+        <li style="margin-bottom:1rem;"><a href="index.html" style="color:white;text-decoration:none;font-weight:bold;">Dashboard</a></li>
+        <li style="margin-bottom:1rem;"><a href="attendance.html" style="color:white;text-decoration:none;">Attendance Records</a></li>
+      </ul>
+    </aside>
+    <main class="admin-content">
+      <h1 style="margin-bottom:2rem; font-size:1.5rem;">Dashboard Overview</h1>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3 style="color:var(--color-text-muted);font-size:0.9rem;margin-bottom:0.5rem;">Total Attendance Today</h3>
+          <p style="font-size:1.5rem;font-weight:bold;color:var(--color-primary);" id="totalToday">0</p>
+        </div>
+        <div class="stat-card">
+          <h3 style="color:var(--color-text-muted);font-size:0.9rem;margin-bottom:0.5rem;">Total Events</h3>
+          <p style="font-size:1.5rem;font-weight:bold;color:var(--color-primary);">2</p>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const records = JSON.parse(localStorage.getItem('admin_mock_records') || '[]');
+      document.getElementById('totalToday').textContent = records.length;
+    });
+  </script>
+</body>
+</html>

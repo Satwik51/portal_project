@@ -1,0 +1,28 @@
+:root {
+  /* Colors - Sarkari with Light Yellow Theme */
+  --color-bg: #FFFDE7; /* Classic Light Yellow / Cream */
+  --color-card-bg: #FFFFFF;
+  --color-primary: #003366; /* Classic NIC / Navy Blue */
+  --color-primary-hover: #002244;
+  --color-accent: #990000; /* Traditional Maroon */
+  --color-text-main: #333333; /* Standard dark grey */
+  --color-text-muted: #555555;
+  --color-border: #D7CCC8; /* Warmer, softer border */
+  --color-error: #cc0000;
+  --color-success: #008000;
+
+  /* Typography - Modern & Elegant */
+  --font-family: 'Poppins', Arial, sans-serif;
+  --font-elegant: 'Lora', serif;
+  
+  /* Spacing */
+  --space-xs: 5px;
+  --space-sm: 10px;
+  --space-md: 15px;
+  --space-lg: 20px;
+  --space-xl: 25px;
+
+  /* Borders & Shadows - Boxy and strict */
+  --border-radius: 2px;
+  --box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}

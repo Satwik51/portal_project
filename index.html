@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workshop Attendance Portal</title>
+  
+  <!-- Preconnect to speed up 3rd-party resources -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  
+  <!-- Preload critical background image -->
+  <link rel="preload" as="image" href="assets/website_background/background_image_website.png">
+  
+  <!-- Load Google Fonts asynchronously/non-blocking -->
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/attendance.css">
+  <link rel="stylesheet" href="css/admin.css">
+
+  <!-- jsPDF & AutoTable for PDF Generation (Deferred) -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+  <header>
+    <img src="assets/logo/bhu_logo.png" alt="BHU Logo" class="header-logo">
+    <div class="header-title-container">
+      <div class="header-college-name">Mahila Mahavidyalaya, BHU</div>
+      <div class="header-portal-title">Department of Vocal Music, Instrumental Music and Dance</div>
+    </div>
+    <img src="assets/logo/mmv__bhu_logo.png" alt="MMV Logo" class="header-logo">
+  </header>
+
+  <!-- Navigation Toggle -->
+  <div class="top-nav-bar">
+    <div class="top-nav-container">
+      <button id="navMarkAttendance" class="nav-btn active-primary">Mark Attendance</button>
+      <button id="navAdminPortal" class="nav-btn">Admin Portal</button>
+    </div>
+  </div>
+ 
+  <main>
+    <!-- ATTENDANCE VIEW -->
+    <div class="card" id="mainCard">
+      <div class="card-header">
+        <h1 class="card-title">Mark Attendance</h1>
+      </div>
+
+      <div class="event-info" id="sessionInfo">
+        <!-- 1. Topic (Event) at the very top -->
+        <div class="event-info-item">
+          <span class="event-info-label">Event</span>
+          <span class="event-info-value" id="displayEvent">Loading...</span>
+        </div>
+        
+        <!-- 2. Date and Time in the middle -->
+        <div class="event-info-item" style="display:flex; gap:20px; width:100%; max-width:none; padding-top:10px; border-top: 1px dashed #ccc; margin-top: 5px;">
+          <div style="flex:1;">
+            <span class="event-info-label">Date</span>
+            <span class="event-info-value" id="displayDay">...</span>
+          </div>
+          <div style="flex:1;">
+            <span class="event-info-label">Time</span>
+            <span class="event-info-value" id="displaySession">...</span>
+          </div>
+        </div>
+
+        <!-- 3. Venue at the very bottom -->
+        <div class="event-info-item" style="padding-top:10px; border-top: 1px dashed #ccc; margin-top: 5px;">
+          <span class="event-info-label">Venue</span>
+          <span class="event-info-value" id="displayVenue">Loading...</span>
+        </div>
+      </div>
+
+      <div id="globalError" style="display: none; background: #ffe6e6; color: #cc0000; padding: 10px; border: 1px solid #cc0000; font-weight:bold; margin-bottom: 15px; font-size:13px;"></div>
+
+      <!-- Main Form -->
+      <form id="attendanceForm" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="enrollmentNumber">Enrollment Number <span style="color:var(--color-error)">*</span></label>
+          <input type="text" class="form-control" id="enrollmentNumber" placeholder="e.g. 24MCA001" required>
+          <div class="error-feedback"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="studentName">Student Name <span style="color:var(--color-error)">*</span></label>
+          <input type="text" class="form-control" id="studentName" placeholder="e.g. Rahul Sharma" required>
+          <div class="error-feedback"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="gender">Gender <span style="color:var(--color-error)">*</span></label>
+          <input type="text" class="form-control select-trigger" id="gender" placeholder="-- Select Gender --" readonly required style="background-color: #fff; cursor: pointer;">
+          <div class="error-feedback"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="course">Course <span style="color:var(--color-error)">*</span></label>
+          <input type="text" class="form-control select-trigger" id="course" placeholder="-- Select Course --" readonly required style="background-color: #fff; cursor: pointer;">
+          <div class="error-feedback"></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="proceedBtn">Open Camera for Selfie</button>
+      </form>
+
+      <!-- Selfie Verification Section (Hidden initially) -->
+      <div id="selfieSection" style="display: none; margin-top: 20px; text-align: center;">
+        <h3 style="color:#003366; margin-bottom: 10px; font-weight: bold; border-bottom: 2px solid #ccc; padding-bottom: 10px;">LIVE SELFIE VERIFICATION</h3>
+        <p style="font-size: 13px; color: #333; margin-bottom: 12px; font-weight: bold;">INSTRUCTION: Ensure your face is clearly visible within the frame before capturing.</p>
+        
+        <div style="background: #fff0f0; color: #b30000; padding: 10px 12px; border-left: 4px solid #cc0000; font-size: 11px; font-weight: 600; margin-bottom: 18px; text-align: left; display: flex; align-items: flex-start; gap: 8px; border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top: 2px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <span style="line-height: 1.4;">IMPORTANT: Proxies are strictly prohibited. Your live selfie photograph goes directly to the Professor (Admin) for manual verification.</span>
+        </div>
+        
+        <div style="background: #fff; padding: 5px; border: 2px solid #000; display: inline-block;">
+          <video id="cameraFeed" autoplay playsinline style="width: 100%; max-width: 300px; transform: scaleX(-1); display: block;"></video>
+        </div>
+        <canvas id="cameraCanvas" style="display:none;"></canvas>
+        
+        <div style="margin-top: 20px;">
+          <button id="captureSubmitBtn" class="btn btn-primary" style="background:#003366; border-color:#003366; border-radius: 0; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">CAPTURE & MARK ATTENDANCE</button>
+        </div>
+      </div>
+    </div> <!-- End mainCard -->
+
+    <!-- ADMIN PORTAL VIEW -->
+    <div id="adminView" style="display: none; width: 100%; max-width: 1200px; margin: 40px auto;">
+      
+      <!-- Login Screen -->
+      <div id="loginScreen" style="max-width: 420px; margin: 0 auto; text-align: center;">
+        <div style="margin-bottom: 25px; display: flex; justify-content: center;">
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="#003366" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+          </svg>
+        </div>
+        <h2 style="color: #003366; margin-bottom: 25px; font-size: 1.5rem; font-family: var(--font-elegant); font-weight: 600; letter-spacing: 0.5px;">AUTHORIZED PERSONNEL ONLY</h2>
+        <form id="loginForm">
+          <div class="form-group" style="text-align: left;">
+            <label class="form-label">Admin ID</label>
+            <input type="text" id="adminId" class="form-control" placeholder="Enter Admin ID" required>
+          </div>
+          <div class="form-group" style="text-align: left;">
+            <label class="form-label">Password</label>
+            <input type="password" id="adminPass" class="form-control" placeholder="Enter Password" required>
+          </div>
+          <div id="loginError" style="color: #dc2626; font-size: 13px; margin-bottom: 15px; display: none; font-weight: 600; background:#fef2f2; padding:10px; border-radius:6px;">Incorrect ID or Password!</div>
+          <button type="submit" class="btn btn-primary">Secure Login</button>
+        </form>
+      </div>
+
+      <!-- Dashboard Screen -->
+      <div id="dashboardScreen" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #990000; padding-bottom: 10px;">
+          <h2 style="color: #003366; font-family: var(--font-elegant); font-weight: 600; text-transform: uppercase;">Administrative Dashboard</h2>
+          <button class="export-btn logout-btn" id="logoutBtn" style="background: #990000; padding: 8px 16px;">Logout</button>
+        </div>
+
+        <div class="dashboard-content" style="background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 4px; border: 1px solid #e0e0e0;">
+          
+          <!-- Summary Cards -->
+          <div class="summary-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+            <div class="summary-card" style="border-left: 4px solid #003366; padding: 15px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+              <div style="font-size: 12px; font-weight: 600; color: #003366; text-transform: uppercase;">Total Attendances</div>
+              <div id="totalCount" style="font-size: 24px; color: #333; margin-top: 5px;">0</div>
+            </div>
+            <div class="summary-card" style="border-left: 4px solid #003366; padding: 15px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+              <div style="font-size: 12px; font-weight: 600; color: #003366; text-transform: uppercase;">Total Courses</div>
+              <div id="uniqueCoursesCount" style="font-size: 24px; color: #333; margin-top: 5px;">0</div>
+            </div>
+            <div class="summary-card" style="border-left: 4px solid #003366; padding: 15px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+              <div style="font-size: 12px; font-weight: 600; color: #003366; text-transform: uppercase;">Latest Session</div>
+              <div id="latestSession" style="font-size: 14px; color: #333; margin-top: 5px; font-weight: 500;">-</div>
+            </div>
+          </div>
+
+          <!-- Controls (Search/Filter/Export) -->
+          <div class="admin-actions" style="margin-top: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+              <div class="filter-group">
+                <input type="text" id="searchInput" placeholder="Search Name or Enrollment No.">
+              </div>
+              <div class="filter-group">
+                <select id="courseFilter">
+                  <option value="ALL">All Courses</option>
+                  <option value="B.A.">B.A.</option>
+                  <option value="M.A.">M.A.</option>
+                  <option value="B.Mus.">B.Mus.</option>
+                  <option value="M.Mus.">M.Mus.</option>
+                  <option value="B.P.A.">B.P.A.</option>
+                  <option value="M.P.A.">M.P.A.</option>
+                  <option value="Diploma">Diploma</option>
+                  <option value="Ph.D.">Ph.D.</option>
+                </select>
+              </div>
+            </div>
+              
+            <div style="display:flex; gap: 10px;">
+              <button class="export-btn" id="exportPdfBtn" style="background:#003366;">Download PDF</button>
+              <button class="export-btn" id="exportBtn">Export CSV</button>
+              <button class="export-btn" id="deleteSelectedBtn" style="background:#dc2626; display:none;">Delete Selected</button>
+              <button class="export-btn" id="deleteAllBtn" style="background:#991b1b;">Delete All</button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table id="attendanceTable">
+              <thead>
+                <tr>
+                  <th style="width: 40px;"><input type="checkbox" id="selectAllCheckbox"></th>
+                  <th style="width: 140px;">TIMESTAMP</th>
+                  <th>STUDENT NAME</th>
+                  <th>ENROLLMENT NO.</th>
+                  <th>COURSE</th>
+                  <th>EVENT / SESSION</th>
+                </tr>
+              </thead>
+              <tbody id="attendanceTableBody">
+                <!-- Data will be populated here -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Controls -->
+          <div id="paginationControls" style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee;">
+            <div style="font-size: 13px; color: #555;" id="pageInfo">Showing 0 of 0</div>
+            <div style="display: flex; gap: 8px;">
+              <button id="prevPageBtn" class="nav-btn nav-btn-primary" style="padding: 6px 12px; font-size: 12px;" disabled>Previous</button>
+              <button id="nextPageBtn" class="nav-btn nav-btn-primary" style="padding: 6px 12px; font-size: 12px;" disabled>Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Custom Bottom Sheet for Selects -->
+  <div class="bottom-sheet-overlay" id="bottomSheetOverlay">
+    <div class="bottom-sheet" id="bottomSheet">
+      <div class="sheet-header">
+        <h3 id="sheetTitle">Select Option</h3>
+        <button type="button" class="sheet-close" id="sheetClose">&times;</button>
+      </div>
+      <div class="sheet-search-container">
+        <input type="text" id="sheetSearch" class="form-control" placeholder="Search...">
+      </div>
+      <div class="sheet-options" id="sheetOptions">
+        <!-- Options injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Designed, Developed and Hosted by Students, Mahila Mahavidyalaya, Banaras Hindu University.</p>
+    <p>&copy; 2026 All Rights Reserved.</p>
+  </footer>
+
+  <div id="toast" class="fake-toast"></div>
+
+  <!-- SweetAlert2 for nice dialogs and toasts -->
+  <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <script type="module" src="js/attendance.js"></script>
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>

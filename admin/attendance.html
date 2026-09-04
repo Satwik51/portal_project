@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Records - Admin Panel</title>
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <h2>Admin Panel</h2>
+      <ul style="margin-top:2rem; list-style:none;">
+        <li style="margin-bottom:1rem;"><a href="index.html" style="color:white;text-decoration:none;">Dashboard</a></li>
+        <li style="margin-bottom:1rem;"><a href="attendance.html" style="color:white;text-decoration:none;font-weight:bold;">Attendance Records</a></li>
+      </ul>
+    </aside>
+    <main class="admin-content">
+      <h1 style="margin-bottom:2rem; font-size:1.5rem;">Attendance Records</h1>
+      
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Enrollment No.</th>
+              <th>Name</th>
+              <th>Course</th>
+              <th>Session</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody id="attendanceTableBody">
+            <tr><td colspan="6" style="text-align:center;">No records found.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+  <script type="module" src="../js/admin.js"></script>
+</body>
+</html>

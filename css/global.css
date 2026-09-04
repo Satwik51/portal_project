@@ -1,0 +1,100 @@
+
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--color-bg);
+  background-image: url('../assets/website_background/background_image_website.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* Ensures background stays fixed while scrolling on mobile/desktop */
+  color: var(--color-text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+
+
+header {
+  background-color: #ffffff;
+  border-bottom: 4px solid var(--color-primary);
+  padding: 15px 30px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-logo {
+  height: 70px;
+  width: auto;
+}
+
+.header-title-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.header-college-name {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.header-portal-title {
+  font-size: 16px;
+  color: var(--color-primary);
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+main {
+  flex: 1;
+  padding: var(--space-xl) var(--space-md);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+footer {
+  background-color: var(--color-primary);
+  color: white;
+  text-align: center;
+  padding: 15px;
+  font-size: 12px;
+  margin-top: auto;
+  border-top: 3px solid #FF9933; /* Subtle tricolor touch */
+}
+
+footer p {
+  margin: 3px 0;
+}
+
+@media (max-width: 768px) {
+  header {
+    padding: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+  }
+  .header-logo {
+    height: 55px;
+  }
+  .header-title-container {
+    order: 3;
+    width: 100%;
+    text-align: center;
+  }
+  .header-college-name {
+    font-size: 18px;
+    line-height: 1.2;
+  }
+  .header-portal-title {
+    font-size: 14px;
+    margin-top: 4px;
+    line-height: 1.3;
+  }
+}
