@@ -133,8 +133,14 @@ app.delete('/api/v1/attendance', async (req, res) => {
     }
 });
 
-// Start Server
+// Start Server or Export for Vercel
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Backend Server running on http://localhost:${PORT}`);
-});
+if (process.env.VERCEL) {
+    // Vercel Serverless Function export
+    module.exports = app;
+} else {
+    // Local Development
+    app.listen(PORT, () => {
+        console.log(`🚀 Backend Server running on http://localhost:${PORT}`);
+    });
+}
