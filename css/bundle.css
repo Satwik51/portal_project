@@ -656,19 +656,21 @@ select.enhanced {
 
 /* Elegant specific fields */
 #displayEvent {
-  font-family: var(--font-elegant);
+  font-family: var(--font-family);
   font-size: 1.15rem;
-  font-weight: 600;
-  font-style: italic;
+  font-weight: 700;
   color: #003366; /* Deep navy for the main title */
-  line-height: 1.4;
-  margin-bottom: 4px;
+  line-height: 1.5;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
 }
 
 #displayVenue {
-  font-family: var(--font-elegant);
-  font-style: italic;
+  font-family: var(--font-family);
+  font-size: 0.95rem;
+  font-weight: 500;
   color: #4a4a4a;
+  line-height: 1.5;
 }
 
 .success-icon {
