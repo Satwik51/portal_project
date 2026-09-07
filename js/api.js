@@ -8,7 +8,7 @@ const API = {
       return {
         data: {
           event: 'INDIAN CLASSICAL MUSIC VOCAL, INSTRUMENTAL MUSIC & DANCE EXPLORING RIYAZ, RAGA & RASA-BHAVA',
-          day: '07.09.2026',
+          day: 'Day 2 - 08.09.2026',
           session: '11:00 AM',
           venue: 'SAVITRIBAI PHULE AUDITORIUM, MAHILA MAHAVIDYALAYA BHU, VARANASI',
           sessionId: 'S1',
