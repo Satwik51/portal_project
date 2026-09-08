@@ -460,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     fontSize: 10, 
                     valign: 'middle', 
                     cellPadding: 4,
-                    minCellHeight: 18 // Ensure enough height for the photo
+                    minCellHeight: 24 // Increased height to fit larger photo
                 },
                 headStyles: { 
                     fillColor: [0, 51, 102], 
@@ -468,7 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     fontStyle: 'bold'
                 },
                 columnStyles: {
-                    1: { cellWidth: 20, halign: 'center' } // Photo column width
+                    1: { cellWidth: 26, halign: 'center' } // Increased column width for larger photo
                 },
                 didDrawCell: function(data) {
                     // Draw Selfie Image in the 2nd column (index 1)
@@ -476,7 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         // Access the hidden 7th column (index 6) from the raw data
                         const base64Img = data.row.raw && data.row.raw[6] ? data.row.raw[6] : null;
                         if (base64Img && base64Img.startsWith('data:image')) {
-                            const dim = 12; // 12x12 mm square
+                            const dim = 18; // Increased from 12 to 18 (18x18 mm square) for better print clarity
                             // Center horizontally and vertically
                             const xPos = data.cell.x + (data.cell.width - dim) / 2;
                             const yPos = data.cell.y + (data.cell.height - dim) / 2;
