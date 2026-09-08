@@ -99,6 +99,34 @@ app.post('/api/v1/attendance', async (req, res) => {
     }
 });
 
+// API Route to update attendance photo (Selfie)
+app.put('/api/v1/attendance/photo', async (req, res) => {
+    try {
+        const { enrollment_number, day, selfie_base64 } = req.body;
+        
+        // Check if existing record
+        const [existing] = await db.query(
+            'SELECT id FROM attendance_records WHERE enrollment_number = ? AND day = ?',
+            [enrollment_number, day]
+        );
+        
+        if (existing.length === 0) {
+            return res.status(404).json({ error: 'Attendance record not found for today. Please mark attendance normally first.' });
+        }
+
+        // Update selfie
+        await db.query(
+            'UPDATE attendance_records SET selfie_base64 = ? WHERE id = ?',
+            [selfie_base64, existing[0].id]
+        );
+
+        res.json({ data: { success: true, message: 'Profile photo updated successfully!' } });
+    } catch (err) {
+        console.error("Update Error:", err);
+        res.status(500).json({ error: 'Internal Database Error' });
+    }
+});
+
 // API Route to fetch all attendance (For Admin Dashboard)
 app.get('/api/v1/attendance', async (req, res) => {
     try {

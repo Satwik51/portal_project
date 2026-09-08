@@ -306,11 +306,35 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (res.code === 'DUPLICATE') {
                     if(typeof Swal !== 'undefined') {
                         Swal.fire({
-                            icon: 'warning',
+                            icon: 'info',
                             title: 'Already Marked!',
-                            text: 'You have already marked your attendance for today. Multiple submissions are not allowed.',
-                            confirmButtonColor: '#003366'
+                            text: 'You have already marked your attendance for today. Would you like to update your profile photo with the new selfie you just captured?',
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes, Update Photo',
+                            cancelButtonText: 'No, Cancel',
+                            confirmButtonColor: '#003366',
+                            cancelButtonColor: '#d33'
+                        }).then(async (result) => {
+                            if (result.isConfirmed) {
+                                UI.setLoading(captureSubmitBtn, true, 'Updating Photo...');
+                                const updateRes = await API.updateAttendancePhoto(formData);
+                                UI.setLoading(captureSubmitBtn, false, '📸 Capture & Mark Attendance');
+                                
+                                if (updateRes.error) {
+                                    Swal.fire('Error', updateRes.error, 'error');
+                                    attendanceForm.style.display = 'block';
+                                    selfieSection.style.display = 'none';
+                                } else {
+                                    Swal.fire('Updated!', 'Your photo was successfully updated.', 'success').then(() => {
+                                        window.location.href = 'success.html';
+                                    });
+                                }
+                            } else {
+                                attendanceForm.style.display = 'block';
+                                selfieSection.style.display = 'none';
+                            }
                         });
+                        return; // Prevent standard toggle flow below since Swal is async
                     } else {
                         alert('You have already marked your attendance for today. Multiple submissions are not allowed.');
                     }

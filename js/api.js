@@ -141,6 +141,33 @@ const API = {
         return { error: errorMsg, code: 'NETWORK_ERR' };
       }
     }
+  },
+
+  async updateAttendancePhoto(payload) {
+    if (CONFIG.USE_MOCK_API) {
+      if (!navigator.onLine) {
+        return { error: 'No Internet Connection.', code: 'OFFLINE_ERR' };
+      }
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      try {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/attendance/photo`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        const result = await response.json();
+        if (!response.ok) {
+           return { error: result.error || 'Server Error', code: result.code || `HTTP_${response.status}` };
+        }
+        return result;
+      } catch (err) {
+        clearTimeout(timeoutId);
+        return { error: 'Network Error: Cannot reach the server.', code: 'NETWORK_ERR' };
+      }
+    }
   }
 };
 
