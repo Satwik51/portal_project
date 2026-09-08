@@ -446,7 +446,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     record.student_name || 'N/A', // Col 2: Name
                     record.enrollment_number || 'N/A', // Col 3: Enrollment
                     record.course || 'N/A', // Col 4: Course
-                    `${record.event_name || 'N/A'}\n${record.day || ''} | ${record.session_name || ''}` // Col 5: Session
+                    `${record.event_name || 'N/A'}\n${record.day || ''} | ${record.session_name || ''}`, // Col 5: Session
+                    record.selfie_base64 || '' // Col 6: Hidden column for base64 image data
                 ];
             });
 
@@ -472,8 +473,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 didDrawCell: function(data) {
                     // Draw Selfie Image in the 2nd column (index 1)
                     if (data.column.index === 1 && data.cell.section === 'body') {
-                        const base64Img = dataToExport[data.row.index].selfie_base64;
-                        if (base64Img) {
+                        // Access the hidden 7th column (index 6) from the raw data
+                        const base64Img = data.row.raw && data.row.raw[6] ? data.row.raw[6] : null;
+                        if (base64Img && base64Img.startsWith('data:image')) {
                             const dim = 12; // 12x12 mm square
                             // Center horizontally and vertically
                             const xPos = data.cell.x + (data.cell.width - dim) / 2;
