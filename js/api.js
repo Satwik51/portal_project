@@ -2,13 +2,39 @@ import CONFIG from './config.js';
 
 let CURRENT_OTP = null;
 
+// Helper to auto-calculate the dynamic Day and Date
+function getDynamicDayString() {
+  const today = new Date();
+  // Workshop start date: Sept 7, 2026
+  const startDate = new Date(2026, 8, 7); // Month is 0-indexed (8 = September)
+
+  // Reset times to midnight for accurate day difference calculation
+  today.setHours(0, 0, 0, 0);
+  startDate.setHours(0, 0, 0, 0);
+
+  // Calculate difference in days (Day 1 = start date)
+  const diffTime = today.getTime() - startDate.getTime();
+  let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+  // Fallback to Day 1 if the current date is somehow before the start date
+  if (diffDays < 1) diffDays = 1;
+
+  // Format today's date as DD.MM.YYYY
+  const dd = String(today.getDate()).padStart(2, '0');
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const yyyy = today.getFullYear();
+  const dateStr = `${dd}.${mm}.${yyyy}`;
+
+  return `Day ${diffDays} - ${dateStr}`;
+}
+
 const API = {
   async getSession(eventId, day, sessionStr) {
     if (CONFIG.USE_MOCK_API) {
       return {
         data: {
           event: 'INDIAN CLASSICAL MUSIC VOCAL, INSTRUMENTAL MUSIC & DANCE EXPLORING RIYAZ, RAGA & RASA-BHAVA',
-          day: 'Day 2 - 08.09.2026',
+          day: getDynamicDayString(),
           session: '11:00 AM',
           venue: 'SAVITRIBAI PHULE AUDITORIUM, MAHILA MAHAVIDYALAYA BHU, VARANASI',
           sessionId: 'S1',
