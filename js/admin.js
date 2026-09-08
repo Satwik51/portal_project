@@ -454,6 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Add Table
             doc.autoTable({
                 startY: 38,
+                rowPageBreak: 'avoid', // Prevents rows (and photos) from splitting across pages
                 head: [['Timestamp', 'Photo', 'Student Name', 'Enrollment No.', 'Course', 'Event / Session']],
                 body: tableData,
                 styles: { 
