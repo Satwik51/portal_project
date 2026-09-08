@@ -70,14 +70,14 @@ app.post('/api/v1/attendance', async (req, res) => {
     try {
         const data = req.body;
         
-        // 1. Check for Duplicate Proxy
+        // 1. Check for Duplicate Proxy (Strictly One per Day per Enrollment Number)
         const [existing] = await db.query(
-            'SELECT id FROM attendance_records WHERE enrollment_number = ? AND session_name = ? AND day = ? AND event_id = ?',
-            [data.enrollment_number, data.session_name, data.day, data.event_id]
+            'SELECT id FROM attendance_records WHERE enrollment_number = ? AND day = ?',
+            [data.enrollment_number, data.day]
         );
         
         if (existing.length > 0) {
-            return res.status(400).json({ error: 'Attendance already marked for this session!', code: 'DUPLICATE' });
+            return res.status(400).json({ error: 'You have already marked your attendance for today!', code: 'DUPLICATE' });
         }
 
         // 2. Save New Record

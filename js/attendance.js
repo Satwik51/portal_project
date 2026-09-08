@@ -303,7 +303,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             UI.setLoading(captureSubmitBtn, false, '📸 Capture & Mark Attendance');
 
             if (res.error) {
-                UI.showToast(res.error, 'error');
+                if (res.code === 'DUPLICATE') {
+                    if(typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Already Marked!',
+                            text: 'You have already marked your attendance for today. Multiple submissions are not allowed.',
+                            confirmButtonColor: '#003366'
+                        });
+                    } else {
+                        alert('You have already marked your attendance for today. Multiple submissions are not allowed.');
+                    }
+                } else {
+                    UI.showToast(res.error, 'error');
+                }
+                
                 // Show form again so they can retry
                 attendanceForm.style.display = 'block';
                 selfieSection.style.display = 'none';
