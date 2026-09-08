@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tableBody = document.getElementById('attendanceTableBody');
     const searchInput = document.getElementById('searchInput');
     const courseFilter = document.getElementById('courseFilter');
+    const dayFilter = document.getElementById('dayFilter');
     const exportBtn = document.getElementById('exportBtn');
     const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
     const deleteAllBtn = document.getElementById('deleteAllBtn');
@@ -80,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
             if (result.data) {
                 allData = result.data;
+                populateDayFilter(); // Populate unique days dynamically
                 filteredData = [...allData]; // Reset filter
                 currentPage = 1;
                 updateDashboard();
@@ -101,6 +103,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     icon: 'error', title: 'Data Fetch Error', text: errMsg
                 });
             }
+        }
+    }
+
+    function populateDayFilter() {
+        const uniqueDays = [...new Set(allData.map(item => item.day))].filter(Boolean);
+        const currentSelection = dayFilter.value;
+        
+        dayFilter.innerHTML = '<option value="ALL">All Days</option>';
+        uniqueDays.forEach(day => {
+            const option = document.createElement('option');
+            option.value = day;
+            option.textContent = day;
+            dayFilter.appendChild(option);
+        });
+        
+        // Restore previous selection if it still exists
+        if (uniqueDays.includes(currentSelection)) {
+            dayFilter.value = currentSelection;
         }
     }
 
@@ -239,13 +259,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function filterData() {
         const query = searchInput.value.toLowerCase();
         const course = courseFilter.value;
+        const day = dayFilter.value;
 
         filteredData = allData.filter(record => {
             const matchesSearch = record.student_name.toLowerCase().includes(query) || 
                                   record.enrollment_number.toLowerCase().includes(query);
             const matchesCourse = course === 'ALL' || record.course === course;
+            const matchesDay = day === 'ALL' || record.day === day;
             
-            return matchesSearch && matchesCourse;
+            return matchesSearch && matchesCourse && matchesDay;
         });
 
         currentPage = 1; // Reset to page 1 on search
@@ -254,6 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     searchInput.addEventListener('input', filterData);
     courseFilter.addEventListener('change', filterData);
+    dayFilter.addEventListener('change', filterData);
 
     // --- 5. Export to CSV (Advanced Feature) ---
     exportBtn.addEventListener('click', () => {
@@ -270,10 +293,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Current Filtered Data (So export respects search/filters)
         const query = searchInput.value.toLowerCase();
         const course = courseFilter.value;
+        const day = dayFilter.value;
         const dataToExport = allData.filter(record => {
             const matchesSearch = record.student_name.toLowerCase().includes(query) || record.enrollment_number.toLowerCase().includes(query);
             const matchesCourse = course === 'ALL' || record.course === course;
-            return matchesSearch && matchesCourse;
+            const matchesDay = day === 'ALL' || record.day === day;
+            return matchesSearch && matchesCourse && matchesDay;
         });
 
         dataToExport.forEach(row => {
@@ -400,12 +425,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const query = searchInput.value.toLowerCase();
             const course = courseFilter.value;
+            const day = dayFilter.value;
             const dataToExport = allData.filter(record => {
                 const sName = (record.student_name || "").toLowerCase();
                 const eNum = (record.enrollment_number || "").toLowerCase();
                 const matchesSearch = sName.includes(query) || eNum.includes(query);
                 const matchesCourse = course === 'ALL' || record.course === course;
-                return matchesSearch && matchesCourse;
+                const matchesDay = day === 'ALL' || record.day === day;
+                return matchesSearch && matchesCourse && matchesDay;
             });
 
             // If filter excluded everything
