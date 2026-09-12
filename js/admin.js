@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
     const deleteAllBtn = document.getElementById('deleteAllBtn');
     const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const toggleAttendanceBtn = document.getElementById('toggleAttendanceBtn');
 
     // DOM Elements - Tabs & Certificate View
     const tabDailyBtn = document.getElementById('tabDailyBtn');
@@ -34,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportCertBtn = document.getElementById('exportCertBtn');
 
     let allData = []; // Stores all fetched data
+    let currentAttendanceStatus = 'open';
     let filteredData = []; // Stores data after search/course filter
     let certificateData = []; // Stores aggregated eligibility data
     let selectedIds = new Set(); // Stores IDs of selected rows
@@ -52,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loginScreen.style.display = 'none';
             dashboardScreen.style.display = 'block';
             fetchData(); // Load data once logged in
+            fetchAttendanceStatus(); // Load system status
         } else {
             loginError.style.display = 'block';
         }
@@ -64,6 +67,56 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('adminPass').value = '';
         loginError.style.display = 'none';
     });
+
+    // --- System Status Toggle Logic ---
+    async function fetchAttendanceStatus() {
+        try {
+            const res = await fetch(`${CONFIG.API_BASE_URL}/settings/attendance-status`);
+            const data = await res.json();
+            currentAttendanceStatus = data.status || 'open';
+            updateToggleUI();
+        } catch(e) {
+            console.error('Failed to fetch status', e);
+        }
+    }
+
+    function updateToggleUI() {
+        if (!toggleAttendanceBtn) return;
+        if (currentAttendanceStatus === 'open') {
+            toggleAttendanceBtn.textContent = 'OPEN';
+            toggleAttendanceBtn.style.background = '#16a34a'; // Green
+        } else {
+            toggleAttendanceBtn.textContent = 'CLOSED';
+            toggleAttendanceBtn.style.background = '#dc2626'; // Red
+        }
+    }
+
+    if (toggleAttendanceBtn) {
+        toggleAttendanceBtn.addEventListener('click', async () => {
+            const newStatus = currentAttendanceStatus === 'open' ? 'closed' : 'open';
+            
+            // Optimistic UI Update
+            toggleAttendanceBtn.textContent = '...';
+            toggleAttendanceBtn.style.background = '#888';
+            
+            try {
+                const res = await fetch(`${CONFIG.API_BASE_URL}/settings/attendance-status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                
+                if(res.ok) {
+                    currentAttendanceStatus = newStatus;
+                } else {
+                    Swal.fire('Error', 'Failed to update system status', 'error');
+                }
+            } catch(e) {
+                Swal.fire('Error', 'Network error. Could not reach server.', 'error');
+            }
+            updateToggleUI();
+        });
+    }
 
     // --- 2. Robust Data Fetching ---
     async function fetchData() {

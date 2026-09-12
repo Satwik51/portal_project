@@ -58,6 +58,17 @@ async function initDb() {
         } catch (e) {
             // Error means column already exists, safe to ignore
         }
+
+        // Settings table for global controls
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS app_settings (
+                setting_key VARCHAR(50) PRIMARY KEY,
+                setting_value VARCHAR(255)
+            )
+        `);
+        // Insert default status if not exists
+        await db.query(`INSERT IGNORE INTO app_settings (setting_key, setting_value) VALUES ('attendance_status', 'open')`);
+
     } catch (err) {
         console.error("❌ Failed to connect to Database. Check your .env file!");
         console.error(err.message);
@@ -65,9 +76,37 @@ async function initDb() {
 }
 initDb();
 
+// --- Settings API Routes ---
+app.get('/api/v1/settings/attendance-status', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT setting_value FROM app_settings WHERE setting_key = "attendance_status"');
+        res.json({ status: rows.length > 0 ? rows[0].setting_value : 'open' });
+    } catch (err) {
+        res.status(500).json({ error: 'Internal Database Error' });
+    }
+});
+
+app.put('/api/v1/settings/attendance-status', async (req, res) => {
+    try {
+        const { status } = req.body;
+        if (status !== 'open' && status !== 'closed') return res.status(400).json({ error: 'Invalid status' });
+        
+        await db.query('UPDATE app_settings SET setting_value = ? WHERE setting_key = "attendance_status"', [status]);
+        res.json({ success: true, status });
+    } catch (err) {
+        res.status(500).json({ error: 'Internal Database Error' });
+    }
+});
+
 // API Route to save attendance
 app.post('/api/v1/attendance', async (req, res) => {
     try {
+        // 0. Check if Attendance is Open
+        const [settings] = await db.query('SELECT setting_value FROM app_settings WHERE setting_key = "attendance_status"');
+        if (settings.length > 0 && settings[0].setting_value === 'closed') {
+            return res.status(403).json({ error: 'Attendance is currently closed by the Admin.', code: 'CLOSED' });
+        }
+
         const data = req.body;
         
         // 1. Check for Duplicate Proxy (Strictly One per Day per Enrollment Number)

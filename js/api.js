@@ -168,6 +168,32 @@ const API = {
         return { error: 'Network Error: Cannot reach the server.', code: 'NETWORK_ERR' };
       }
     }
+  },
+
+  async getAttendanceStatus() {
+    if (CONFIG.USE_MOCK_API) {
+      try {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/settings/attendance-status`);
+        return await response.json();
+      } catch (err) {
+        return { error: 'Network Error', code: 'NETWORK_ERR' };
+      }
+    }
+  },
+
+  async setAttendanceStatus(status) {
+    if (CONFIG.USE_MOCK_API) {
+      try {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/settings/attendance-status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        return await response.json();
+      } catch (err) {
+        return { error: 'Network Error', code: 'NETWORK_ERR' };
+      }
+    }
   }
 };
 
