@@ -109,7 +109,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(res.ok) {
                     currentAttendanceStatus = newStatus;
                 } else {
-                    Swal.fire('Error', 'Failed to update system status', 'error');
+                    let errMsg = 'Failed to update system status';
+                    try {
+                        const errData = await res.json();
+                        if (errData.error) errMsg = errData.error;
+                    } catch(jsonErr) {}
+                    Swal.fire('Error', errMsg, 'error');
                 }
             } catch(e) {
                 Swal.fire('Error', 'Network error. Could not reach server.', 'error');

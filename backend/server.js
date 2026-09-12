@@ -79,9 +79,10 @@ initDb();
 // --- Settings API Routes ---
 app.get('/api/v1/settings/attendance-status', async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT setting_value FROM app_settings WHERE setting_key = "attendance_status"');
+        const [rows] = await db.query(`SELECT setting_value FROM app_settings WHERE setting_key = 'attendance_status'`);
         res.json({ status: rows.length > 0 ? rows[0].setting_value : 'open' });
     } catch (err) {
+        console.error('Settings GET Error:', err);
         res.status(500).json({ error: 'Internal Database Error' });
     }
 });
@@ -91,9 +92,10 @@ app.put('/api/v1/settings/attendance-status', async (req, res) => {
         const { status } = req.body;
         if (status !== 'open' && status !== 'closed') return res.status(400).json({ error: 'Invalid status' });
         
-        await db.query('UPDATE app_settings SET setting_value = ? WHERE setting_key = "attendance_status"', [status]);
+        await db.query(`UPDATE app_settings SET setting_value = ? WHERE setting_key = 'attendance_status'`, [status]);
         res.json({ success: true, status });
     } catch (err) {
+        console.error('Settings PUT Error:', err);
         res.status(500).json({ error: 'Internal Database Error' });
     }
 });
@@ -102,7 +104,7 @@ app.put('/api/v1/settings/attendance-status', async (req, res) => {
 app.post('/api/v1/attendance', async (req, res) => {
     try {
         // 0. Check if Attendance is Open
-        const [settings] = await db.query('SELECT setting_value FROM app_settings WHERE setting_key = "attendance_status"');
+        const [settings] = await db.query(`SELECT setting_value FROM app_settings WHERE setting_key = 'attendance_status'`);
         if (settings.length > 0 && settings[0].setting_value === 'closed') {
             return res.status(403).json({ error: 'Attendance is currently closed by the Admin.', code: 'CLOSED' });
         }
