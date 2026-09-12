@@ -414,10 +414,18 @@ document.addEventListener('DOMContentLoaded', () => {
         editName.value = record.student_name;
         editCourse.value = record.course;
         editModalOverlay.style.display = 'flex';
+        // Override the default opacity:0 from .bottom-sheet-overlay class
+        editModalOverlay.style.opacity = '1';
     }
 
-    if (closeEditModal) closeEditModal.addEventListener('click', () => editModalOverlay.style.display = 'none');
-    if (cancelEditModal) cancelEditModal.addEventListener('click', () => editModalOverlay.style.display = 'none');
+    function closeEditModalUI() {
+        if (!editModalOverlay) return;
+        editModalOverlay.style.display = 'none';
+        editModalOverlay.style.opacity = '0';
+    }
+
+    if (closeEditModal) closeEditModal.addEventListener('click', closeEditModalUI);
+    if (cancelEditModal) cancelEditModal.addEventListener('click', closeEditModalUI);
     
     if (editRecordForm) {
         editRecordForm.addEventListener('submit', async (e) => {
@@ -445,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (res.ok) {
                     Swal.fire('Success', data.message || 'Record updated successfully', 'success');
-                    editModalOverlay.style.display = 'none';
+                    closeEditModalUI();
                     fetchData(); // Refresh the grid
                 } else {
                     Swal.fire('Error', data.error || 'Failed to update record', 'error');
