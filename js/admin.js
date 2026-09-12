@@ -34,6 +34,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const certTableBody = document.getElementById('certTableBody');
     const exportCertBtn = document.getElementById('exportCertBtn');
 
+    // DOM Elements - Edit Modal
+    const editModalOverlay = document.getElementById('editModalOverlay');
+    const closeEditModal = document.getElementById('closeEditModal');
+    const cancelEditModal = document.getElementById('cancelEditModal');
+    const editRecordForm = document.getElementById('editRecordForm');
+    const editRecordId = document.getElementById('editRecordId');
+    const editEnrollment = document.getElementById('editEnrollment');
+    const editName = document.getElementById('editName');
+    const editCourse = document.getElementById('editCourse');
+
     let allData = []; // Stores all fetched data
     let currentAttendanceStatus = 'open';
     let filteredData = []; // Stores data after search/course filter
@@ -349,7 +359,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${record.enrollment_number}</td>
                 <td>${record.course}</td>
                 <td>${record.event_name}<br><span style="font-size:11px; color:#666;">${record.day} | ${record.session_name}</span></td>
+                <td style="text-align:center;">
+                    <button class="edit-record-btn" data-id="${record.id}" style="padding: 4px 10px; font-size:12px; background:#f59e0b; color:white; border:none; border-radius:4px; cursor:pointer;">Edit</button>
+                </td>
             `;
+
+            // Edit record listener
+            const editBtn = tr.querySelector('.edit-record-btn');
+            if (editBtn) {
+                editBtn.addEventListener('click', () => {
+                    openEditModal(record);
+                });
+            }
 
             const imgEl = tr.querySelector('.student-photo-thumbnail');
             if (imgEl) {
@@ -383,6 +404,60 @@ document.addEventListener('DOMContentLoaded', () => {
             tableBody.appendChild(tr);
         });
         updateDeleteButtons();
+    }
+
+    // --- 3.5 Edit Modal Logic ---
+    function openEditModal(record) {
+        if (!editModalOverlay) return;
+        editRecordId.value = record.id;
+        editEnrollment.value = record.enrollment_number;
+        editName.value = record.student_name;
+        editCourse.value = record.course;
+        editModalOverlay.style.display = 'flex';
+    }
+
+    if (closeEditModal) closeEditModal.addEventListener('click', () => editModalOverlay.style.display = 'none');
+    if (cancelEditModal) cancelEditModal.addEventListener('click', () => editModalOverlay.style.display = 'none');
+    
+    if (editRecordForm) {
+        editRecordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                id: editRecordId.value,
+                enrollment_number: editEnrollment.value.trim(),
+                student_name: editName.value.trim(),
+                course: editCourse.value
+            };
+
+            const submitBtn = editRecordForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Saving...';
+            submitBtn.disabled = true;
+
+            try {
+                const res = await fetch(`${CONFIG.API_BASE_URL}/attendance/edit`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    Swal.fire('Success', data.message || 'Record updated successfully', 'success');
+                    editModalOverlay.style.display = 'none';
+                    fetchData(); // Refresh the grid
+                } else {
+                    Swal.fire('Error', data.error || 'Failed to update record', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                Swal.fire('Error', 'Network Error. Could not save.', 'error');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
     }
 
     // Pagination Listeners

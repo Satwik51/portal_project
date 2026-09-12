@@ -179,6 +179,41 @@ app.get('/api/v1/attendance', async (req, res) => {
     }
 });
 
+// API Route to edit attendance record
+app.put('/api/v1/attendance/edit', async (req, res) => {
+    try {
+        const { id, enrollment_number, student_name, course } = req.body;
+        
+        if (!id || !enrollment_number || !student_name || !course) {
+            return res.status(400).json({ error: 'All fields are required' });
+        }
+
+        // Check if updating to an enrollment number that already exists for the SAME day 
+        // (to prevent 2 entries for the same person on the same day if admin changes it)
+        const [current] = await db.query('SELECT day FROM attendance_records WHERE id = ?', [id]);
+        if (current.length > 0) {
+            const day = current[0].day;
+            const [existing] = await db.query(
+                'SELECT id FROM attendance_records WHERE enrollment_number = ? AND day = ? AND id != ?',
+                [enrollment_number, day, id]
+            );
+            if (existing.length > 0) {
+                return res.status(400).json({ error: 'Another entry for this Enrollment Number already exists on this day.', code: 'DUPLICATE' });
+            }
+        }
+
+        await db.query(
+            'UPDATE attendance_records SET enrollment_number = ?, student_name = ?, course = ? WHERE id = ?',
+            [enrollment_number, student_name, course, id]
+        );
+        
+        res.json({ success: true, message: 'Record updated successfully' });
+    } catch (err) {
+        console.error('Edit Error:', err);
+        res.status(500).json({ error: 'Failed to update record' });
+    }
+});
+
 // API Route to delete attendance records
 app.delete('/api/v1/attendance', async (req, res) => {
     try {

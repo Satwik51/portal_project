@@ -242,6 +242,7 @@
                   <th>ENROLLMENT NO.</th>
                   <th>COURSE</th>
                   <th>EVENT / SESSION</th>
+                  <th style="width: 80px; text-align:center;">ACTION</th>
                 </tr>
               </thead>
               <tbody id="attendanceTableBody">
@@ -308,6 +309,44 @@
     </div>
   </main>
   
+  <!-- Admin Edit Modal -->
+  <div class="bottom-sheet-overlay" id="editModalOverlay" style="display:none; z-index: 1000; justify-content: center; align-items: center; background: rgba(0,0,0,0.5);">
+    <div style="background: white; width: 100%; max-width: 400px; border-radius: 8px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+        <h3 style="margin: 0; color: #003366;">Edit Attendance Record</h3>
+        <button id="closeEditModal" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #555;">&times;</button>
+      </div>
+      <form id="editRecordForm">
+        <input type="hidden" id="editRecordId">
+        <div class="form-group">
+          <label class="form-label">Enrollment No.</label>
+          <input type="text" id="editEnrollment" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Student Name</label>
+          <input type="text" id="editName" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Course</label>
+          <select id="editCourse" class="form-control" required>
+            <option value="B.A.">B.A.</option>
+            <option value="M.A.">M.A.</option>
+            <option value="B.Mus.">B.Mus.</option>
+            <option value="M.Mus.">M.Mus.</option>
+            <option value="B.P.A.">B.P.A.</option>
+            <option value="M.P.A.">M.P.A.</option>
+            <option value="Diploma">Diploma</option>
+            <option value="Ph.D.">Ph.D.</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button type="submit" class="btn btn-primary" style="flex: 1;">Save Changes</button>
+          <button type="button" id="cancelEditModal" class="btn" style="flex: 1; background: #e0e0e0; color: #333;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Custom Bottom Sheet for Selects -->
   <div class="bottom-sheet-overlay" id="bottomSheetOverlay">
     <div class="bottom-sheet" id="bottomSheet">
