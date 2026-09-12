@@ -25,8 +25,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const deleteAllBtn = document.getElementById('deleteAllBtn');
     const selectAllCheckbox = document.getElementById('selectAllCheckbox');
 
+    // DOM Elements - Tabs & Certificate View
+    const tabDailyBtn = document.getElementById('tabDailyBtn');
+    const tabCertBtn = document.getElementById('tabCertBtn');
+    const dailyAttendanceTab = document.getElementById('dailyAttendanceTab');
+    const certificateTab = document.getElementById('certificateTab');
+    const certTableBody = document.getElementById('certTableBody');
+    const exportCertBtn = document.getElementById('exportCertBtn');
+
     let allData = []; // Stores all fetched data
     let filteredData = []; // Stores data after search/course filter
+    let certificateData = []; // Stores aggregated eligibility data
     let selectedIds = new Set(); // Stores IDs of selected rows
     
     // Pagination state
@@ -82,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.data) {
                 allData = result.data;
                 populateDayFilter(); // Populate unique days dynamically
+                computeEligibility(); // Generate certificate eligibility stats
                 filteredData = [...allData]; // Reset filter
                 currentPage = 1;
                 updateDashboard();
@@ -104,6 +114,101 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         }
+    }
+
+    // --- Tabs Switching Logic ---
+    tabDailyBtn.addEventListener('click', () => {
+        tabDailyBtn.style.background = '#003366';
+        tabDailyBtn.style.color = 'white';
+        tabCertBtn.style.background = '#e0e0e0';
+        tabCertBtn.style.color = '#333';
+        dailyAttendanceTab.style.display = 'block';
+        certificateTab.style.display = 'none';
+    });
+
+    tabCertBtn.addEventListener('click', () => {
+        tabCertBtn.style.background = '#003366';
+        tabCertBtn.style.color = 'white';
+        tabDailyBtn.style.background = '#e0e0e0';
+        tabDailyBtn.style.color = '#333';
+        dailyAttendanceTab.style.display = 'none';
+        certificateTab.style.display = 'block';
+    });
+
+    // --- Certificate Eligibility Logic ---
+    function computeEligibility() {
+        const studentMap = new Map();
+        
+        allData.forEach(record => {
+            const enroll = (record.enrollment_number || "").trim().toUpperCase();
+            if(!enroll) return; // skip empty
+            
+            if(!studentMap.has(enroll)) {
+                studentMap.set(enroll, {
+                    enrollment_number: enroll,
+                    student_name: record.student_name || 'N/A',
+                    course: record.course || 'N/A',
+                    daysAttended: new Set()
+                });
+            }
+            
+            // Add unique day
+            if(record.day) {
+                studentMap.get(enroll).daysAttended.add(record.day);
+            }
+        });
+        
+        certificateData = Array.from(studentMap.values()).map(student => {
+            const daysCount = student.daysAttended.size;
+            return {
+                ...student,
+                daysCount: daysCount,
+                isEligible: daysCount >= 4
+            };
+        });
+        
+        // Sort by Eligible first, then daysCount desc, then Name
+        certificateData.sort((a, b) => {
+            if(a.isEligible !== b.isEligible) return b.isEligible === true ? -1 : 1;
+            if(b.daysCount !== a.daysCount) return b.daysCount - a.daysCount;
+            return a.student_name.localeCompare(b.student_name);
+        });
+        
+        renderCertificateTab();
+    }
+
+    function renderCertificateTab() {
+        let total = certificateData.length;
+        let eligible = certificateData.filter(s => s.isEligible).length;
+        let notEligible = total - eligible;
+        
+        document.getElementById('certTotalCount').textContent = total;
+        document.getElementById('certEligibleCount').textContent = eligible;
+        document.getElementById('certNotEligibleCount').textContent = notEligible;
+        
+        certTableBody.innerHTML = '';
+        if(total === 0) {
+            certTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No data found.</td></tr>';
+            return;
+        }
+        
+        certificateData.forEach(student => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid #eee';
+            
+            const statusBadge = student.isEligible 
+                ? '<span style="background:#16a34a; color:white; padding:4px 8px; border-radius:4px; font-size:12px; font-weight:bold;">Eligible</span>' 
+                : '<span style="background:#dc2626; color:white; padding:4px 8px; border-radius:4px; font-size:12px; font-weight:bold;">Not Eligible</span>';
+                
+            tr.innerHTML = `
+                <td style="padding:10px;">${student.enrollment_number}</td>
+                <td style="padding:10px;">${student.student_name}</td>
+                <td style="padding:10px;">${student.course}</td>
+                <td style="padding:10px; text-align:center; font-weight:bold;">${student.daysCount}</td>
+                <td style="padding:10px; text-align:center;">${statusBadge}</td>
+            `;
+            certTableBody.appendChild(tr);
+        });
     }
 
     function populateDayFilter() {
@@ -520,6 +625,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Save PDF
             doc.save(`Attendance_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+        });
+    }
+
+    // --- 8. Export Certificate Eligibility to PDF ---
+    if (exportCertBtn) {
+        exportCertBtn.addEventListener('click', () => {
+            const eligibleStudents = certificateData.filter(s => s.isEligible);
+            if (eligibleStudents.length === 0) {
+                if(typeof Swal !== 'undefined') Swal.fire('Empty', 'No eligible students found to export!', 'info');
+                else alert("No eligible students found to export!");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            
+            // Header
+            doc.setFontSize(16);
+            doc.setTextColor(0, 51, 102);
+            doc.text('MAHILA MAHAVIDYALAYA, BANARAS HINDU UNIVERSITY', 14, 20);
+            doc.setFontSize(12);
+            doc.text('CERTIFICATE ELIGIBILITY REPORT', 14, 28);
+            
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.text(`Total Eligible: ${eligibleStudents.length} Students`, 14, 34);
+            doc.text(`Print Date: ${new Date().toLocaleString('en-IN')}`, 14, 40);
+
+            // Table Data
+            const tableData = eligibleStudents.map((s, index) => [
+                index + 1,
+                s.enrollment_number,
+                s.student_name,
+                s.course,
+                s.daysCount
+            ]);
+
+            doc.autoTable({
+                startY: 45,
+                head: [['S.No.', 'Enrollment No.', 'Student Name', 'Course', 'Days Attended']],
+                body: tableData,
+                styles: { fontSize: 10, cellPadding: 3 },
+                headStyles: { fillColor: [22, 163, 74], textColor: 255, fontStyle: 'bold' } // Green header
+            });
+
+            doc.save(`Certificate_Eligibility_${new Date().toISOString().split('T')[0]}.pdf`);
         });
     }
 });

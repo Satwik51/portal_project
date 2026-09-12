@@ -166,7 +166,14 @@
           <button class="export-btn logout-btn" id="logoutBtn" style="background: #990000; padding: 8px 16px;">Logout</button>
         </div>
 
-        <div class="dashboard-content" style="background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 4px; border: 1px solid #e0e0e0;">
+        <!-- Admin Tabs -->
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+          <button id="tabDailyBtn" class="admin-tab active-tab" style="padding: 10px 20px; background: #003366; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer;">Daily Attendance</button>
+          <button id="tabCertBtn" class="admin-tab" style="padding: 10px 20px; background: #e0e0e0; color: #333; border: none; border-radius: 4px; font-weight: 600; cursor: pointer;">Certificate Eligibility</button>
+        </div>
+
+        <!-- 1. Daily Attendance Tab (Original) -->
+        <div id="dailyAttendanceTab" class="dashboard-content" style="background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 4px; border: 1px solid #e0e0e0;">
           
           <!-- Summary Cards -->
           <div class="summary-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
@@ -244,7 +251,52 @@
               <button id="nextPageBtn" class="nav-btn nav-btn-primary" style="padding: 6px 12px; font-size: 12px;" disabled>Next</button>
             </div>
           </div>
+        </div> <!-- End of dailyAttendanceTab -->
+
+        <!-- 2. Certificate Eligibility Tab -->
+        <div id="certificateTab" class="dashboard-content" style="display: none; background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 4px; border: 1px solid #e0e0e0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+              <h3 style="color: #003366; font-weight: 600; margin:0; margin-bottom: 5px;">Certificate Eligibility List</h3>
+              <p style="font-size: 13px; color: #555; margin:0;">Students with 4 or more days of attendance are marked as Eligible.</p>
+            </div>
+            <button class="export-btn" id="exportCertBtn" style="background:#16a34a;">Download Eligible PDF</button>
+          </div>
+
+          <!-- Certificate Stats -->
+          <div class="summary-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+            <div class="summary-card" style="border-left: 4px solid #003366; padding: 15px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+              <div style="font-size: 12px; font-weight: 600; color: #003366; text-transform: uppercase;">Total Unique Students</div>
+              <div id="certTotalCount" style="font-size: 24px; color: #333; margin-top: 5px;">0</div>
+            </div>
+            <div class="summary-card" style="border-left: 4px solid #16a34a; padding: 15px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+              <div style="font-size: 12px; font-weight: 600; color: #16a34a; text-transform: uppercase;">Eligible (≥ 4 Days)</div>
+              <div id="certEligibleCount" style="font-size: 24px; color: #16a34a; margin-top: 5px;">0</div>
+            </div>
+            <div class="summary-card" style="border-left: 4px solid #dc2626; padding: 15px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+              <div style="font-size: 12px; font-weight: 600; color: #dc2626; text-transform: uppercase;">Not Eligible</div>
+              <div id="certNotEligibleCount" style="font-size: 24px; color: #dc2626; margin-top: 5px;">0</div>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table id="certTable">
+              <thead>
+                <tr style="background:#003366; color:white;">
+                  <th style="padding:10px;">ENROLLMENT NO.</th>
+                  <th style="padding:10px;">STUDENT NAME</th>
+                  <th style="padding:10px;">COURSE</th>
+                  <th style="padding:10px; text-align: center;">DAYS ATTENDED</th>
+                  <th style="padding:10px; text-align: center;">ELIGIBILITY</th>
+                </tr>
+              </thead>
+              <tbody id="certTableBody">
+                <!-- Data will be populated here -->
+              </tbody>
+            </table>
+          </div>
         </div>
+
       </div>
     </div>
   </main>
