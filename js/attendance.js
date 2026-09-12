@@ -160,12 +160,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const mainCard = document.getElementById('mainCard');
                 if (mainCard) {
                     mainCard.innerHTML = `
-                        <div style="text-align: center; padding: 40px 20px;">
-                            <svg width="80" height="80" viewBox="0 0 24 24" fill="#dc2626" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:20px;">
+                        <div style="text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center;">
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="#dc2626" xmlns="http://www.w3.org/2000/svg" style="margin: 0 auto 20px auto; display: block;">
                                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-1.85.63-3.55 1.69-4.9l11.21 11.21C15.55 19.37 13.85 20 12 20zm6.31-3.1L7.1 5.69C8.45 4.63 10.15 4 12 4c4.41 0 8 3.59 8 8 0 1.85-.63 3.55-1.69 4.9z"/>
                             </svg>
-                            <h2 style="color:#dc2626; font-weight:bold; margin-bottom:10px;">ATTENDANCE CLOSED</h2>
-                            <p style="color:#555;">The attendance system is currently locked by the administrator. Please wait for instructions.</p>
+                            <h2 style="color:#dc2626; font-weight:bold; margin-bottom:10px; text-align: center;">ATTENDANCE CLOSED</h2>
+                            <p style="color:#555; text-align: center;">The attendance system is currently locked by the administrator. Please wait for instructions.</p>
                         </div>
                     `;
                 }
